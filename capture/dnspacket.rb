@@ -1,7 +1,6 @@
 require 'capture/rrs'
 require 'capture/opcode'
 require 'capture/rcode'
-require 'capture/rr_yaml'
 
 module FatNS
   module Capture
