@@ -1,0 +1,64 @@
+- !ruby/object:FatNS::Capture::DnsPacket 
+  questions: 
+    - !cs.technion.ac.il,2006/question 
+      qclass: IN
+      type: A
+      host: google.com
+  answers: 
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: A
+      host: google.com
+      data: !ruby/ipaddr 64.233.167.99
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: A
+      host: google.com
+      data: !ruby/ipaddr 64.233.187.99
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: A
+      host: google.com
+      data: !ruby/ipaddr 72.14.207.99
+  authorities: 
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: NS
+      host: google.com
+      data: ns2.google.com
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: NS
+      host: google.com
+      data: ns3.google.com
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: NS
+      host: google.com
+      data: ns4.google.com
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: NS
+      host: google.com
+      data: ns1.google.com
+  additionals: 
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: A
+      host: ns1.google.com
+      data: !ruby/ipaddr 216.239.32.10
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: A
+      host: ns2.google.com
+      data: !ruby/ipaddr 216.239.34.10
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: A
+      host: ns3.google.com
+      data: !ruby/ipaddr 216.239.36.10
+    - !cs.technion.ac.il,2006/record 
+      qclass: IN
+      type: A
+      host: ns4.google.com
+      data: !ruby/ipaddr 216.239.38.10
