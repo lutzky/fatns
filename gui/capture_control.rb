@@ -33,9 +33,26 @@ module FatNS
 
         @dnscapture = Capture::DnsCapture.new
 
-        @btn_Start = Gtk::Button.new 'Start capturing'
-        @btn_Stop = Gtk::Button.new 'Stop capturing'
-        @btn_Replay = Gtk::Button.new 'Replay'
+        @btn_Start = Gtk::Button.new
+        hb = Gtk::HBox.new
+        hb.pack_start Gtk::Image.new(Gtk::Stock::MEDIA_PLAY,
+                                     Gtk::IconSize::BUTTON)
+        hb.pack_start 'Start capturing'.to_label
+        @btn_Start.add hb
+
+        @btn_Stop = Gtk::Button.new
+        hb = Gtk::HBox.new
+        hb.pack_start Gtk::Image.new(Gtk::Stock::STOP,
+                                     Gtk::IconSize::BUTTON)
+        hb.pack_start 'Stop capturing'.to_label
+        @btn_Stop.add hb
+
+        @btn_Replay = Gtk::Button.new
+        hb = Gtk::HBox.new
+        hb.pack_start Gtk::Image.new(Gtk::Stock::REDO,
+                                     Gtk::IconSize::BUTTON)
+        hb.pack_start 'Replay'.to_label
+        @btn_Replay.add hb
 
         @btn_Stop.sensitive = false
 

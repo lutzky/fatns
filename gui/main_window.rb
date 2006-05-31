@@ -155,7 +155,7 @@ module FatNS
       def load_cap
         catch :cancel do
           clear
-          dialog = Gtk::FileChooserDialog.new("Replay capture",
+          dialog = Gtk::FileChooserDialog.new("Load capture",
           parent_window,
           Gtk::FileChooser::ACTION_OPEN,
           nil,
