@@ -28,13 +28,11 @@ module FatNS
 
       def recv(pkt)
         @queries = {} if not @queries
-        puts pkt.class
         return if not pkt.valid? or pkt.is_answer?
         @queries[pkt.questions[0].host] = [] if not @queries[pkt.questions[0].host]       
         @queries[pkt.questions[0].host] << pkt 
 
         if @n >= 0
-          puts 'there' + @queries[pkt.questions[0].host].size.to_s
           if @queries[pkt.questions[0].host].size == @n 
             @queries[pkt.questions[0].host].each do |i|
               send i
@@ -45,7 +43,6 @@ module FatNS
             end
           end
         else
-          puts 'here' + @queries[pkt.questions[0].host].size.to_s
           if @queries[pkt.questions[0].host].size == 2
             @queries[pkt.questions[0].host].each do |i|
               send i

@@ -4,18 +4,9 @@ Installation instructions for FatNS
 Before you start, please make sure you have the following packages installed:
 
 * ruby1.8
-* ruby1.8-dev
 * libgtk2-ruby
 * libgtkhtml2-ruby
-* libpcap0.8
-* libpcap0.8-dev
-
-Now you must compile the pcap extensions for ruby.
-
-cd libpcap-ruby1.8-0.6-custom/
-ruby extconf.rb
-make
-sudo (make install|checkinstall)
+* libpcap-ruby1.8 >= 0.6-5ubuntu1 (ubuntu version is patched for findalldevs support)
 
 Now you may run the application. Mind you, to capture, it has to be run as
 root:

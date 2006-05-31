@@ -15,7 +15,6 @@ module FatNS
         return unless pkt.is_answer?
         return unless pkt.recursion_wanted and pkt.recursion_ok
 
-        puts 'PKT'
         answers = []
         question = nil
 
