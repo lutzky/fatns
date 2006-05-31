@@ -57,6 +57,7 @@ module FatNS
 
       # Open file
       def from_file(file)
+        stop
         @pcapi = Pcap::Capture.open_offline(file)
         capture_loop
       end
@@ -102,6 +103,7 @@ module FatNS
       end
 
       def replay
+        stop
         @client_packet_queue = @saved_packet_queue.copy
       end
 
