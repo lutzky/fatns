@@ -6,7 +6,7 @@ Gtk.init
 require 'gui/splash'
 splash_screen = FatNS::GUI.splash!
 
-timeout = Gtk.timeout_add(1000) do
+timeout = Gtk.timeout_add(10) do
   require 'gui/main_window'
   @window = FatNS::GUI::MainWindow.new
   @window.signal_connect('destroy') { Gtk.main_quit }
