@@ -1,5 +1,5 @@
 #!/usr/bin/ruby
-require 'pcap'
+require 'threaded_pcap'
 require 'capture/packet'
 require 'capture/ipcontainer'
 require 'capture/tcpcontainer'
@@ -41,7 +41,7 @@ module FatNS
 
       def initialize # :nodoc:
         @validate_dns = ValidationDefaults
-        @pcapi = nil
+        @tcap = ThreadedPcap.new
 
         @ip_fixer = Hash.new
         @tcp_fixer = Hash.new
@@ -49,39 +49,31 @@ module FatNS
 
       # Returns a list of all devices that can be use for capture
       def findalldevs
-        Pcap.findalldevs
+        ThreadedPcap.findalldevs
       end
 
       # Start capuring with the specified device +dev+
       def start(dev)
-        @pcapi.close if not @pcapi.nil?
-        @all_packets = Array.new
-        @pcapi = Pcap::Capture.open_live( dev, 64*1024)
+        @tcap.start
         @poll=true
       end
 
       # Stop capturing
       def stop
+        @tcap.stop
         @poll=false
       end
 
       # Open file
       def from_file(file)
         @poll=true
-        @all_packets = Array.new
-        @dns_packets = Array.new
-        @pcapi = Pcap::Capture.open_offline(file)
+        @tcap.from_file(file)
       end
 
       # Save all the packets
       def to_file(file)
         #TODO allow selective saving
-        pcapd=Pcap::Dumper::open(@pcapi, file)
-        arr = @all_packets
-        arr.each do |packet|
-          pcapd.dump(packet)
-        end
-        pcapd.close
+        @tcap.to_file(file)
       end
 
       # return array of DnsPackets
@@ -104,8 +96,8 @@ module FatNS
         new_packets = []
         #puts "Attempting to get at most #{i} packets"
         catch :no_more_packets do
-          1.upto(10*i) do |unused_variable_name|
-            pkt = @pcapi.get_packet
+          1.upto(i) do |unused_variable_name|
+            pkt = @tcap.poll
             if pkt
               new_packets << pkt
             else
@@ -113,13 +105,10 @@ module FatNS
             end
           end
         end
-        #puts "Got #{new_packets.length} packets"
 
         return_dns = []
 
         new_packets.each do |raw_pkt|
-          # save packet for file save
-          @all_packets << raw_pkt
           return_dns += process_packet(raw_pkt)
         end
 
@@ -137,7 +126,7 @@ module FatNS
         #puts "Attempting to get at most #{i} packets"
         catch :no_more_packets do
           while true do  
-            pkt = @pcapi.get_packet
+            pkt = @tcap.poll
             if pkt
               new_packets << pkt
             else
