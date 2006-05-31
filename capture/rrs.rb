@@ -95,13 +95,6 @@ module FatNS
         end
       end
 
-      # deprecated
-      def length
-        @host.length + 1 
-        1 + # for null
-        4   # for class and type
-      end
-
       def to_html
         if QCLASS_TABLE[@qclass] and DNS_TABLE[@type]
           "<i>[#{QCLASS_TABLE[@qclass][0]}]</i> <b>#{DNS_TABLE[@type][0]}</b>: #@host"

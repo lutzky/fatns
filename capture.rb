@@ -54,7 +54,7 @@ module FatNS
 
       # Start capuring with the specified device +dev+
       def start(dev)
-        @tcap.start
+        @tcap.start dev
         @poll=true
       end
 
@@ -74,6 +74,10 @@ module FatNS
       def to_file(file)
         #TODO allow selective saving
         @tcap.to_file(file)
+      end
+
+      def replay
+        @tcap.replay
       end
 
       # return array of DnsPackets
@@ -139,8 +143,6 @@ module FatNS
         return_dns = []
 
         new_packets.each do |raw_pkt|
-          # save packet for file save
-          @all_packets << raw_pkt
           return_dns += process_packet(raw_pkt)
         end
 

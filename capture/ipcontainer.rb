@@ -22,7 +22,8 @@ module FatNS
       attr_reader :dest_port
 
       # the time at which the *first* packet wes recived
-      attr_reader :time
+      # TODO deprecated
+      # attr_reader :time
 
       # the raw data:
       attr_reader :data

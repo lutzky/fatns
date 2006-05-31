@@ -35,10 +35,13 @@ module FatNS
 
         @btn_Start = Gtk::Button.new 'Start capturing'
         @btn_Stop = Gtk::Button.new 'Stop capturing'
+        @btn_Replay = Gtk::Button.new 'Replay'
+
         @btn_Stop.sensitive = false
 
         @btn_Start.signal_connect('clicked') { start_capture }
         @btn_Stop.signal_connect('clicked') { stop_capture }
+        @btn_Replay.signal_connect('clicked') { replay }
 
         @cmb_Interface = Gtk::ComboBox.new
 
@@ -52,6 +55,7 @@ module FatNS
 
         hbox.pack_start @btn_Start, false, false
         hbox.pack_start @btn_Stop, false, false
+        hbox.pack_start @btn_Replay, false, false
         hbox.pack_start @cmb_Interface, false, false
         hbox.pack_end @progressbar, false, false
 
@@ -80,6 +84,7 @@ module FatNS
             @dnscapture.start iface
             @cmb_Interface.sensitive = false
             @btn_Start.sensitive = false
+            @btn_Replay.sensitive = false
             @btn_Stop.sensitive = true
             @capture_timeout = Gtk.timeout_add(TIMEOUT) { capture_quanta }
           end
@@ -97,12 +102,19 @@ module FatNS
         @dnscapture.get_all_packets.each { |packet| @packet_proc.call(packet) }
       end
 
+      def replay
+        toplevel.clear
+        @dnscapture.replay
+        @dnscapture.get_all_packets.each { |packet| @packet_proc.call(packet) }
+      end
+
       # Stop capturing now. This is visible in the GUI.
       def stop_capture
         @dnscapture.stop
         Gtk.timeout_remove @capture_timeout
         @cmb_Interface.sensitive = true
         @btn_Start.sensitive = true
+        @btn_Replay.sensitive = true
         @btn_Stop.sensitive = false
         @progressbar.fraction = 0
         toplevel.lock false

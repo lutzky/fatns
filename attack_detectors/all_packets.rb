@@ -11,9 +11,13 @@ module FatNS
         send pkt
       end
 
+      def initialize
+        super
+        @packet_group = {}
+        @packet_list = []
+      end
+
       def organize(pkt)
-        @packet_group = {} unless @packet_group
-        @packet_list  = [] unless @packet_list
         if not pkt.is_answer?
           @packet_list.unshift(pkt)
           @packet_group[pkt]=[]

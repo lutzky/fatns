@@ -99,6 +99,8 @@ module FatNS
       def initialize
         super
 
+        @has_packets = false
+
         screen = Gdk::Screen.default
         set_default_size screen.width * 0.85, screen.height * 0.85
         vbox = Gtk::VBox.new false, 2

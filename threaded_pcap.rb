@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 require 'pcap'
 require 'thread'
+require 'pp'
 
 module FatNS 
 
@@ -24,25 +25,24 @@ module FatNS
         @saved_packet_queue = Queue.new
       end
 
-      # Returns a list of all devices that can be use for capture
-      def findalldevs
-        Pcap.findalldevs
-      end
-
       # Start capuring with the specified device +dev+
       def start(dev)
         @pcapi.close unless @pcapi.nil?
+        @saved_packet_queue.clear
         @pcapi = Pcap::Capture.open_live dev, 64*1024
+        capture_loop
       end
 
       # Stop capturing
       def stop
-        @capture_thread.kill
+        @capture_thread.kill unless @capture_thread.nil?
+        @capture_thread = nil
       end
 
       # Open file
       def from_file(file)
         @pcapi = Pcap::Capture.open_offline(file)
+        capture_loop
       end
 
       # Save all the packets
@@ -73,8 +73,31 @@ module FatNS
       #   end
       #   dcap.stop
       def poll
-        return nil if @packet_queue.empty?
-        @packet_queue.pop
+        return nil if @client_packet_queue.empty?
+        @client_packet_queue.pop
+      end
+
+      class << self
+        # Returns a list of all devices that can be use for capture
+        def findalldevs
+          Pcap.findalldevs
+        end
+      end
+
+      def replay
+        # Thread-safe replay. Unfortunately, there does not seem
+        # to be a better way to duplicate our queue.
+
+        tempqueue = Queue.new
+
+        until @saved_packet_queue.empty?
+          tempqueue << @saved_packet_queue.pop
+        end
+        until tempqueue.empty?
+          pkt = tempqueue.pop
+          @saved_packet_queue << pkt
+          @client_packet_queue << pkt
+        end
       end
 
       private 
@@ -88,7 +111,6 @@ module FatNS
           end
         end
       end
-
     end
   end
 end

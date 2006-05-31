@@ -143,6 +143,8 @@ module FatNS
           end
         end
 
+        @link_handler = nil
+
         @treeview.selection.signal_connect('changed') do |selection|
           if selection.selected
             @buffer.open_stream('text/html')
