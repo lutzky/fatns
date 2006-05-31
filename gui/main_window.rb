@@ -73,19 +73,21 @@ module FatNS
       end
 
       # Clear all packets from all detectors. This asks the user whether
-      # he wants to do this or not.
-      def clear
+      # he wants to do this or not, unless +force+ is set to +true+.
+      def clear(force = false)
         return unless @has_packets
 
-        dialog = Gtk::MessageDialog.new nil,
-        Gtk::Dialog::MODAL | Gtk::Dialog::DESTROY_WITH_PARENT,
-        Gtk::MessageDialog::WARNING, Gtk::MessageDialog::BUTTONS_YES_NO,
-        'This will clear all captured packets. Are you sure?'
+        unless force
+          dialog = Gtk::MessageDialog.new nil,
+            Gtk::Dialog::MODAL | Gtk::Dialog::DESTROY_WITH_PARENT,
+            Gtk::MessageDialog::WARNING, Gtk::MessageDialog::BUTTONS_YES_NO,
+            'This will clear all captured packets. Are you sure?'
 
-        result = dialog.run
-        dialog.destroy
+          result = dialog.run
+          dialog.destroy
 
-        throw :cancel unless result == Gtk::Dialog::RESPONSE_YES
+          throw :cancel unless result == Gtk::Dialog::RESPONSE_YES
+        end
 
         0.upto(@notebook.n_pages - 1) do |i|
           @notebook.get_nth_page(i).clear
@@ -265,7 +267,7 @@ module FatNS
         Gtk::Stock::CLEAR, proc { catch(:cancel) { clear } } ],
         ["/_File/_Save Capture", "<StockItem>", nil,
         Gtk::Stock::SAVE, proc { save_cap } ],
-        ["/_File/_Replay Capture", "<StockItem>", nil,
+        ["/_File/_Load Capture", "<StockItem>", nil,
         Gtk::Stock::OPEN, proc { load_cap } ],
 
         ["/_File/Separator", "<Separator>", nil, nil, nil],

@@ -3,6 +3,22 @@ require 'pcap'
 require 'thread'
 require 'pp'
 
+class Queue
+  def copy
+    temp = Queue.new
+    result = Queue.new
+    until self.empty?
+      temp << self.pop
+    end
+    until temp.empty?
+      obj = temp.pop
+      self << obj
+      result << obj
+    end
+    result
+  end
+end
+
 module FatNS 
 
   # = Packet capturing and handling
@@ -50,8 +66,9 @@ module FatNS
         #TODO allow selective saving
         pcapd=Pcap::Dumper::open(@pcapi, file)
 
-        until @saved_packet_queue.empty?
-          pcapd.dump @saved_packet_queue.pop
+        packets_for_file = @saved_packet_queue.copy
+        until packets_for_file.empty?
+          pcapd.dump packets_for_file.pop
         end
         pcapd.close
       end
@@ -85,19 +102,7 @@ module FatNS
       end
 
       def replay
-        # Thread-safe replay. Unfortunately, there does not seem
-        # to be a better way to duplicate our queue.
-
-        tempqueue = Queue.new
-
-        until @saved_packet_queue.empty?
-          tempqueue << @saved_packet_queue.pop
-        end
-        until tempqueue.empty?
-          pkt = tempqueue.pop
-          @saved_packet_queue << pkt
-          @client_packet_queue << pkt
-        end
+        @client_packet_queue = @saved_packet_queue.copy
       end
 
       private 

@@ -120,7 +120,7 @@ module FatNS
       end
 
       def replay
-        toplevel.clear
+        toplevel.clear true
         @dnscapture.replay
         @dnscapture.get_all_packets.each { |packet| @packet_proc.call(packet) }
       end
