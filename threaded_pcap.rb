@@ -1,5 +1,6 @@
 #!/usr/bin/ruby
 require 'pcap'
+require 'thread'
 
 module FatNS 
 
@@ -18,6 +19,9 @@ module FatNS
 
       def initialize # :nodoc:
         @pcapi = nil
+        @capture_thread = nil
+        @client_packet_queue = Queue.new
+        @saved_packet_queue = Queue.new
       end
 
       # Returns a list of all devices that can be use for capture
@@ -27,22 +31,17 @@ module FatNS
 
       # Start capuring with the specified device +dev+
       def start(dev)
-        @pcapi.close if not @pcapi.nil?
-        @all_packets = Array.new
-        @pcapi = Pcap::Capture.open_live( dev, 64*1024)
-        @poll=true
+        @pcapi.close unless @pcapi.nil?
+        @pcapi = Pcap::Capture.open_live dev, 64*1024
       end
 
       # Stop capturing
       def stop
-        @poll=false
+        @capture_thread.kill
       end
 
       # Open file
       def from_file(file)
-        @poll=true
-        @all_packets = Array.new
-        @dns_packets = Array.new
         @pcapi = Pcap::Capture.open_offline(file)
       end
 
@@ -50,34 +49,46 @@ module FatNS
       def to_file(file)
         #TODO allow selective saving
         pcapd=Pcap::Dumper::open(@pcapi, file)
-        arr = @all_packets
-        arr.each do |packet|
-          pcapd.dump(packet)
+
+        until @saved_packet_queue.empty?
+          pcapd.dump @saved_packet_queue.pop
         end
         pcapd.close
       end
 
-      # return array of DnsPackets
+      # Returns a new packet if such is available, or +nil+ otherwise.
       #
       # == Usage example
+      #
       #   dcap=DnsCapture.new
       #   dcap.start(dcap.findalldevs[0])
       #   while true
       #     do stuff
       #     
-      #     arr = poll 100
+      #     pkt = poll
       #  
-      #     do more stuff with arr
+      #     unless pkt.nil?
+      #       do more stuff with pkt
+      #     end
       #   end
-      #
-      def poll(i)
+      #   dcap.stop
+      def poll
+        return nil if @packet_queue.empty?
+        @packet_queue.pop
       end
-
 
       private 
       def capture_loop
+        return unless @capture_thread.nil?
+
+        @capture_thread = Thread.new do
+          @pcapi.each_packet do |pkt|
+            @client_packet_queue << pkt
+            @saved_packet_queue << pkt
+          end
+        end
       end
 
-      end
     end
   end
+end
