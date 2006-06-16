@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+
 require 'gtk2'
 
 Gtk.init
