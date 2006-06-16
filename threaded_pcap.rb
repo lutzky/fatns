@@ -98,7 +98,11 @@ module FatNS
       class << self
         # Returns a list of all devices that can be use for capture
         def findalldevs
+          begin
           Pcap.findalldevs
+          rescue
+            return [] # you haven't ehough permissions to do this
+          end
         end
       end
 

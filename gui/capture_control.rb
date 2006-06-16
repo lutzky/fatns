@@ -62,91 +62,98 @@ module FatNS
 
         @cmb_Interface = Gtk::ComboBox.new
 
-        @dnscapture.findalldevs.reject { |dev| dev == 'any' }.each do |iface|
-          @cmb_Interface.append_text iface
+
+        temp_devs = @dnscapture.findalldevs
+        if temp_devs.empty?
+          @btn_Start.sensitive = false
         end
 
-        @cmb_Interface.active = 0
 
-        @progressbar = Gtk::ProgressBar.new
+          temp_devs.reject { |dev| dev == 'any' }.each do |iface|
+            @cmb_Interface.append_text iface
+          end
 
-        hbox.pack_start @btn_Start, false, false
-        hbox.pack_start @btn_Stop, false, false
-        hbox.pack_start @btn_Replay, false, false
-        hbox.pack_start @cmb_Interface, false, false
-        hbox.pack_end @progressbar, false, false
+          @cmb_Interface.active = 0
 
-        @packet_proc = packet_proc
-      end
+          @progressbar = Gtk::ProgressBar.new
 
-      # Start capturing now. This is visible in the GUI.
-      def start_capture
-        begin
-          iface = @cmb_Interface.active_iter[0]
-          raise if iface.empty?
-        rescue
-          dlg = Gtk::MessageDialog.new(
-          self.toplevel, Gtk::MessageDialog::DESTROY_WITH_PARENT,
-          Gtk::MessageDialog::ERROR, Gtk::MessageDialog::BUTTONS_CLOSE,
+          hbox.pack_start @btn_Start, false, false
+          hbox.pack_start @btn_Stop, false, false
+          hbox.pack_start @btn_Replay, false, false
+          hbox.pack_start @cmb_Interface, false, false
+          hbox.pack_end @progressbar, false, false
+
+          @packet_proc = packet_proc
+        end
+
+        # Start capturing now. This is visible in the GUI.
+        def start_capture
+          begin
+            iface = @cmb_Interface.active_iter[0]
+            raise if iface.empty?
+          rescue
+            dlg = Gtk::MessageDialog.new(
+                                         self.toplevel, Gtk::MessageDialog::DESTROY_WITH_PARENT,
+                                         Gtk::MessageDialog::ERROR, Gtk::MessageDialog::BUTTONS_CLOSE,
           'No capture interface selected.'
-          )
-          dlg.signal_connect('response') do |widget, data|
-            widget.destroy
-          end
-          dlg.show
-        else
-          catch :cancel do
-            toplevel.clear
-            toplevel.lock true
-            @dnscapture.start iface
-            @cmb_Interface.sensitive = false
-            @btn_Start.sensitive = false
-            @btn_Replay.sensitive = false
-            @btn_Stop.sensitive = true
-            @capture_timeout = Gtk.timeout_add(TIMEOUT) { capture_quanta }
+                                        )
+                                        dlg.signal_connect('response') do |widget, data|
+                                          widget.destroy
+                                        end
+                                        dlg.show
+          else
+            catch :cancel do
+              toplevel.clear
+              toplevel.lock true
+              @dnscapture.start iface
+              @cmb_Interface.sensitive = false
+              @btn_Start.sensitive = false
+              @btn_Replay.sensitive = false
+              @btn_Stop.sensitive = true
+              @capture_timeout = Gtk.timeout_add(TIMEOUT) { capture_quanta }
+            end
           end
         end
-      end
 
-      # Save currently recorded packets to file +filename+
-      def save(filename)
-        @dnscapture.to_file(filename)
-      end
-
-      # Load +filename+ as a pcap capture and run it.
-      def load(filename)
-        @dnscapture.from_file(filename)
-        @dnscapture.get_all_packets.each { |packet| @packet_proc.call(packet) }
-      end
-
-      def replay
-        toplevel.clear true
-        @dnscapture.replay
-        @dnscapture.get_all_packets.each { |packet| @packet_proc.call(packet) }
-      end
-
-      # Stop capturing now. This is visible in the GUI.
-      def stop_capture
-        @dnscapture.stop
-        Gtk.timeout_remove @capture_timeout
-        @cmb_Interface.sensitive = true
-        @btn_Start.sensitive = true
-        @btn_Replay.sensitive = true
-        @btn_Stop.sensitive = false
-        @progressbar.fraction = 0
-        toplevel.lock false
-      end
-
-      private
-      def capture_quanta
-        @progressbar.pulse
-
-        @dnscapture.poll(POLL_AMOUNT).each do |packet|
-          @packet_proc.call(packet)
+        # Save currently recorded packets to file +filename+
+        def save(filename)
+          @dnscapture.to_file(filename)
         end
 
-        true
+        # Load +filename+ as a pcap capture and run it.
+        def load(filename)
+          @dnscapture.from_file(filename)
+          @dnscapture.get_all_packets.each { |packet| @packet_proc.call(packet) }
+        end
+
+        def replay
+          toplevel.clear true
+          @dnscapture.replay
+          @dnscapture.get_all_packets.each { |packet| @packet_proc.call(packet) }
+        end
+
+        # Stop capturing now. This is visible in the GUI.
+        def stop_capture
+          @dnscapture.stop
+          Gtk.timeout_remove @capture_timeout
+          @cmb_Interface.sensitive = true
+          @btn_Start.sensitive = true
+          @btn_Replay.sensitive = true
+          @btn_Stop.sensitive = false
+          @progressbar.fraction = 0
+          toplevel.lock false
+        end
+
+        private
+        def capture_quanta
+          @progressbar.pulse
+
+          @dnscapture.poll(POLL_AMOUNT).each do |packet|
+            @packet_proc.call(packet)
+          end
+
+          true
+        end
       end
     end
   end
-end
