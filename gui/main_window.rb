@@ -99,7 +99,7 @@ module FatNS
       end
 
       def initialize
-        super
+        super 'FatNS'
 
         @has_packets = false
 
