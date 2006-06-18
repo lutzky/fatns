@@ -281,11 +281,14 @@ module FatNS
         ["/_Capture/Separator", "<Separator>", nil, nil, nil],
         ]
 
-        menu_items.concat AttackDetection.get_detectors.collect { |ad|
+        detector_menu_items = AttackDetection.get_detectors.sort do |ad_a, ad_b|
+          ad_a::Name <=> ad_b::Name
+        end.collect do |ad|
           ["/_Attack detectors/#{ad::Name}", "<Item>", nil, nil,
            proc { add_detector_page ad }]
-        }
+        end
 
+        menu_items.concat detector_menu_items
 
         menu_factory.create_items(menu_items)
 
