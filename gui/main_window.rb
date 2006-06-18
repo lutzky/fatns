@@ -279,8 +279,6 @@ module FatNS
         ["/_Capture"],
         # Capture option togglers go here
         ["/_Capture/Separator", "<Separator>", nil, nil, nil],
-        ["/_Capture/_YAMLize current packet", "<Item>", nil, nil,
-          proc { @notebook.get_nth_page(@notebook.page).yaml_popup } ]
         ]
 
         menu_items.concat AttackDetection.get_detectors.collect { |ad|

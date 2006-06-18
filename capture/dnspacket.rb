@@ -276,10 +276,6 @@ module FatNS
         end
       end
 
-      def to_yaml_properties
-        %w{ @questions @answers @authorities @additionals }
-      end
-
       def to_long_html
         to_html + "<h1>Additional Information</h1>" + @source_html
       end

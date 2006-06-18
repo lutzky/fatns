@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
 require 'gtkhtml2'
 
 module FatNS
@@ -61,38 +60,6 @@ module FatNS
         query[3] = packet.is_answer? ? "Answer" : "Question"
         query[4] = packet.summary
         query[5] = packet
-      end
-
-      # Show the current packet, YAMLized, in a popup
-      def yaml_popup
-        return if @treeview.selection.selected.nil?
-
-        packet_yaml = [ @treeview.selection.selected[5] ].to_yaml
-
-        dlg = Gtk::Dialog.new('YAMLized packet', nil,
-          Gtk::Dialog::DESTROY_WITH_PARENT,
-          [Gtk::Stock::CLOSE, Gtk::Dialog::RESPONSE_CLOSE],
-          [Gtk::Stock::COPY, Gtk::Dialog::RESPONSE_YES]
-        )
-
-        buffer = Gtk::TextBuffer.new
-        buffer.text = packet_yaml
-        textview = Gtk::TextView.new buffer
-        textview.editable = false
-        textview.modify_font(MONOSPACE_FONT)
-        textscroll = Gtk::ScrolledWindow.new nil,nil
-        textscroll.set_policy Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC
-        textscroll.shadow_type = Gtk::SHADOW_ETCHED_IN
-        textscroll.add textview
-
-        dlg.vbox.pack_start textscroll
-        dlg.show_all
-
-        if dlg.run == Gtk::Dialog::RESPONSE_YES
-          Gtk::Clipboard.get(Gdk::Display.default,
-                             Gdk::Selection::CLIPBOARD).text = packet_yaml
-        end
-        dlg.destroy
       end
 
       protected
@@ -162,9 +129,6 @@ module FatNS
         end
 
         context_menu = Gtk::Menu.new
-        to_yaml = Gtk::MenuItem.new('To _YAML')
-        to_yaml.signal_connect('activate') { yaml_popup }
-        context_menu.append to_yaml
         context_menu.show_all
 
         @treeview.signal_connect('button_press_event') do |w,e|
