@@ -118,6 +118,10 @@ module FatNS
       def initialize
         super 'FatNS'
 
+        Gtk::Window.set_default_icon_list [16,32,48,64,128].collect { |size|
+          Gdk::Pixbuf.new("graphics/fatns_logo_#{size}.png")
+        }
+
         @has_packets = false
 
         screen = Gdk::Screen.default
