@@ -193,6 +193,36 @@ module FatNS
         end
       end
 
+      def about
+        authors = ["Ohad Lutzky", "Boaz Atzmon"]
+        license = %Q[
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 2.1 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+        ]
+
+        Gtk::AboutDialog.show(self,
+          :name => "FatNS",
+          :version => FatNS::VERSION,
+          :copyright => "(C) 2006 Ohad Lutzky & Boaz Goldstein",
+          :license => license,
+          :website => "http://fatns.sourceforge.net",
+          :comments => "FatNS Analyzes and Tests Name Servers",
+          :authors => authors,
+          :logo => Gtk::Window.default_icon_list[4]
+        )
+      end
+
       protected
       # Add a detector page for the given detector class (this should be
       # a subclass of AttackDetector). If the detector has parameters, the
@@ -298,8 +328,8 @@ module FatNS
 
         ["/_Attack detectors"],
         ["/_Capture"],
-        # Capture option togglers go here
-        ["/_Capture/Separator", "<Separator>", nil, nil, nil],
+
+        ["/_Help/About", "<StockItem>", nil, Gtk::Stock::ABOUT, proc { about }],
         ]
 
         detector_menu_items = AttackDetection.get_detectors.sort do |ad_a, ad_b|

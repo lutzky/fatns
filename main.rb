@@ -19,6 +19,10 @@
 
 require 'gtk2'
 
+module FatNS
+  VERSION = "[SVN]"
+end
+
 Gtk.init
 require 'gui/splash'
 splash_screen = FatNS::GUI.splash!
