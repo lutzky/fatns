@@ -74,10 +74,10 @@ module FatNS
           return MX.new(raw_dns,@original)
         when 16 # TXT
           return raw_dns.uncompress!(@original)
-        when 17..27
+        when 16..27
           return raw_dns
         when 28 # AAAA IPv6
-          return IPAddr.new(raw_dns.unpack('nnnnnnnn').join(':'))
+          return IPAddr.new(raw_dns.unpack('nnnnnnnn').map{|i| i.to_s(16)}.join(':'))
         when 29..255 ### much unused stuff
           return raw_dns
         end
@@ -113,7 +113,7 @@ module FatNS
         if QCLASS_TABLE[@qclass] and DNS_TABLE[@type]
           "<i>[#{QCLASS_TABLE[@qclass][0]}]</i> <b>#{DNS_TABLE[@type][0]}</b>: #@host"
         else
-          puts "Invalid class #{@qclass.to_s(16)}, type #{@type.to_s(16)}"
+          #puts "Invalid class #{@qclass.to_s(16)}, type #{@type.to_s(16)}"
         end
       end
 
@@ -122,7 +122,7 @@ module FatNS
         if QCLASS_TABLE[@qclass] and DNS_TABLE[@type]
           "[#{QCLASS_TABLE[@qclass][0]}] #{DNS_TABLE[@type][0]} #@host"
         else
-          puts "invalid class #{@qclass.to_s(16)}  type #{@type.to_s(16)}"
+          #puts "invalid class #{@qclass.to_s(16)}  type #{@type.to_s(16)}"
         end
       end
 
@@ -141,13 +141,16 @@ module FatNS
     # * data - a data field of type type
     class Record < RR
       include FatNS::Truisms 
+      @@debug=0
 
 
       attr_reader :host,:type,:qclass,:ttl,:data, :invalid, :raw, :pre_data
 
       # construct an answer/Authority/additional from raw dns and the original unparsed packet
       def initialize(raw_dns,orig)
+        @invalid=false
         begin
+          @@debug+=1
           # save original
           @original=orig.dup
           @raw=raw_dns.dup
@@ -161,6 +164,7 @@ module FatNS
           @pre_data=raw_dns.slice!(0,@data_length)
 
           # use type parsing function
+          puts   if @@debug==16
           @data = type_parse(@type,@pre_data)
         rescue
           @invalid=true
