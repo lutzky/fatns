@@ -21,7 +21,7 @@ module FatNS
     ### SOAs are so ugly they get a class of their own
     class SOA
 
-      attr_reader :prime_server,:dude_incharge,
+      attr_reader :prime_server,:master_server,
       :serial, :refresh, :retry, 
       :expire, :minttl, :slaves
 
@@ -29,7 +29,7 @@ module FatNS
       def initialize(raw_data,orig)
         begin
           @prime_server=raw_data.uncompress!(orig)
-          @dude_incharge=raw_data.uncompress!(orig)
+          @master_server=raw_data.uncompress!(orig)
 
           @serial = raw_data.slice!(0,4).unpack('N')[0]
           @refresh = raw_data.slice!(0,4).unpack('N')[0]
@@ -48,7 +48,7 @@ module FatNS
           <h3>Start Of Authority Record</h3>
           <table>
           <tr><td><b>Primary server</b></td><td>#@prime_server</td></tr>
-          <tr><td><b>Master</b></td><td>#@dude_incharge</td></tr>
+          <tr><td><b>Master</b></td><td>#@master_server</td></tr>
           <tr><td><b>Serial</b></td>        <td>0x#{@serial.to_s(16)}</td></tr>
           <tr><td><b>Refresh</b>            <td>0x#{@refresh.to_s(16)}</td></tr>
           <tr><td><b>Retry</b>              <td>0x#{@retry.to_s(16)}</td></tr>

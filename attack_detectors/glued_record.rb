@@ -1,57 +1,39 @@
 require 'gui/params_dialog'
 
+class String
+  # Levels of subdomains to consist identity
+  IdentityLevels = 2
 
-
-
-module FatNS
-
-  module Capture
-    class DnsPacket
-
-      # Levels of subdomains to consist identity
-      IdentityLevels = 2
-
-      # does this packet look like a glued record
-      def sticky?
-        return false if invalid?
-        return false if self.questions.to_a.size == 0 
-        return false if self.additionals.to_a.size == 0
-        self.questions.each do |q|
-          self.additionals.each do |a|
-            hq = q.host.split('.').reverse
-            ha = a.host.split('.').reverse
-            0.upto(IdentityLevels-1) do |i|
-              if hq[i] !=  ha[i]
-                return true
-              end
-            end
-          end  
-        end
-
+  def related_to?(target)
+    splitsrc = self.split('.').reverse
+    splitdest = target.split('.').reverse
+    if (splitsrc.size - splitdest.size).abs > IdentityLevels
+      return false
+    end
+    if splitsrc.size > splitdest.size
+      n = splitdest.size
+    else
+      n = splitsrc.size
+    end
+    0.upto(n-IdentityLevels) do |i|
+      if splitsrc[i] != splitdest[i]
         return false
       end
+    end
+    return true
+  end
+end
 
-      def dsticky?
+module FatNS
+  module Capture
+    class DnsPacket
+      def sticky?
         return false if invalid?
         return false if questions.to_a.size == 0 
         return false if additionals.to_a.size == 0
         questions.each do |q|
           additionals.each do |a|
-            hq = q.host.split('.').reverse
-            ha = a.host.split('.').reverse
-            if (hq.size-ha.size).abs > IdentityLevels
-              return true
-            end
-            if hq.size>ha.size
-              n=ha.size
-            else
-              n=hq.size
-            end
-            0.upto(n-IdentityLevels) do |i|
-              if hq[i] !=  ha[i]
-                return true
-              end
-            end
+            return true unless q.host.related_to?(a.host)
           end  
         end
 
@@ -60,18 +42,14 @@ module FatNS
     end
   end
 
-
   module AttackDetection
-
     class GluedRecord <AttackDetector
 
       Name = 'Glued Record detection'
 
       def recv(pkt)
-        send pkt if pkt.dsticky?  # is that glue?
+        send pkt if pkt.sticky?  # is that glue?
       end
-
-
     end
   end
 end
