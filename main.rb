@@ -20,7 +20,7 @@
 require 'gtk2'
 
 module FatNS
-  VERSION = "[SVN]"
+  VERSION = "0.9.0a"
 end
 
 Gtk.init
